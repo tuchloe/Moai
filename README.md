@@ -129,6 +129,14 @@ Instructions (with videos) on how to use each feature.
 ### Mockups
 
 Provide visuals of your app's screens. You can use tools like Figma or pictures of hand-drawn sketches.
+![467800701_1092451722370991_5789935319439656191_n](https://github.com/user-attachments/assets/5ea2af52-d0d5-4b0e-aede-293759a85870)
+![466288755_901901565266857_2915793108590328489_n](https://github.com/user-attachments/assets/9faf69ed-9e9b-45bc-9708-e43e76644b4a)
+![465873053_1917715578755724_6463455380041972291_n](https://github.com/user-attachments/assets/28e44b27-b2e6-449e-a5d5-80f7a2a7b931)
+![467777794_1139696414392638_4644772189698274264_n](https://github.com/user-attachments/assets/c22be941-f542-4dc6-a218-beaff209b048)
+![465211061_3854330678141868_4397729636206170235_n](https://github.com/user-attachments/assets/05289cc9-9359-4af8-84a2-26fa249d5660)
+![465606987_1127058338906241_7967332543155466375_n](https://github.com/user-attachments/assets/b43e8066-1f65-49b8-9f81-97cb119e4d4c)
+![466418675_1725528138302766_9097447306027146922_n](https://github.com/user-attachments/assets/7600e8c9-8cb6-4e9f-b973-88493f43f453)
+
 
 ### Data
 
