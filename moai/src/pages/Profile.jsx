@@ -41,13 +41,15 @@ const Profile = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
 
+        const rawText = await response.text(); // Capture raw response
+        console.log("🔍 Raw Response from Server:", rawText);
+
         if (!response.ok) {
-          const errorMessage = `Failed to fetch profile: ${response.status} - ${response.statusText}`;
-          console.error("❌", errorMessage);
-          throw new Error(errorMessage);
+          console.error(`❌ Failed to fetch profile: ${response.status} - ${response.statusText}`);
+          throw new Error(`Failed to fetch profile: ${response.status}`);
         }
 
-        const data = await response.json();
+        const data = JSON.parse(rawText);
         console.log("✅ Received profile data:", data);
 
         setProfileData({
@@ -113,9 +115,8 @@ const Profile = () => {
       });
 
       if (!response.ok) {
-        const errorMessage = `Failed to update profile: ${response.status} - ${response.statusText}`;
-        console.error("❌", errorMessage);
-        throw new Error(errorMessage);
+        console.error(`❌ Failed to update profile: ${response.status} - ${response.statusText}`);
+        throw new Error(`Failed to update profile: ${response.status}`);
       }
 
       const updatedData = await response.json();
@@ -203,10 +204,6 @@ const Profile = () => {
               ) : (
                 <p className="profile__bio-text">{profileData.bio}</p>
               )}
-            </div>
-            <div className="profile__gallery">
-              <img src="https://via.placeholder.com/200x150" alt="Gallery" className="profile__gallery-image" />
-              <p className="profile__gallery-text">Gallery</p>
             </div>
           </div>
         </div>
