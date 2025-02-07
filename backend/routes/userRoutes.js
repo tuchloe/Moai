@@ -8,8 +8,12 @@ const router = express.Router();
 router.get("/meet-someone-new", verifyToken, async (req, res) => {
   try {
     const { account_id } = req.user;
-    const { language, religion, interests } = req.query;
+    if (!account_id) {
+      console.error("❌ Missing account_id in request user data.");
+      return res.status(403).json({ error: "Forbidden: Invalid token structure" });
+    }
 
+    const { language, religion, interests } = req.query;
     console.log("🔍 Fetching random user for:", { language, religion, interests });
 
     // 🔍 Get current user's location
@@ -33,7 +37,7 @@ router.get("/meet-someone-new", verifyToken, async (req, res) => {
       queryParams.push(religion);
     }
 
-    if (interests) {
+    if (interests && interests !== "undefined") {
       try {
         const interestArray = JSON.parse(interests);
         if (Array.isArray(interestArray) && interestArray.length > 0) {

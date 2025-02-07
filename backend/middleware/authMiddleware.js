@@ -14,7 +14,7 @@ const verifyToken = (req, res, next) => {
 
     // ✅ Ensure token format is correct (handle "Bearer" prefix)
     if (token.startsWith("Bearer ")) {
-      token = token.slice(7, token.length);
+      token = token.slice(7);
     }
 
     // ✅ Verify JWT Token
@@ -29,8 +29,14 @@ const verifyToken = (req, res, next) => {
         return res.status(403).json({ error: "Forbidden: Invalid token" });
       }
 
+      // ✅ Ensure decoded contains `account_id`
+      if (!decoded.id) {
+        console.error("❌ Decoded token is missing account_id:", decoded);
+        return res.status(403).json({ error: "Forbidden: Invalid token structure" });
+      }
+
       console.log("✅ Token verified successfully for user:", decoded.id);
-      req.user = decoded; // Attach decoded user data to request
+      req.user = { account_id: decoded.id }; // Explicitly attach user ID to request
       next();
     });
   } catch (error) {
