@@ -1,0 +1,169 @@
+// 🎨 Theme Colors
+$primary-color: #fa8d43;
+$secondary-color: #1e3a5f;
+$bg-light: #ffffff;
+$text-dark: #222;
+$text-light: #fff;
+
+// 📱 Responsive Breakpoints
+$desktop: 1200px;
+$tablet: 900px;
+$mobile: 600px;
+
+.signup {
+  text-align: center;
+  background: $bg-light;
+  padding: 2rem;
+  border-radius: 0.625rem;
+  box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
+  width: 90%;
+  max-width: 50rem;
+  margin: auto;
+  margin-top: 5vh;
+
+  &__title {
+    color: $primary-color;
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  // ✅ Two-Column Layout (Desktop & Tablet)
+  &__container {
+    display: flex;
+    justify-content: space-between;
+    gap: 2rem;
+  }
+
+  &__left,
+  &__right {
+    flex: 1;
+  }
+
+  &__left {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  // ✅ Two Inputs in One Row for First & Last Name
+  &__name-row {
+    display: flex;
+    gap: 1rem;
+  }
+
+  &__input {
+    padding: 0.5rem;
+    border: 0.0625rem solid $secondary-color;
+    border-radius: 0.3125rem;
+    font-size: 1rem;
+    width: 100%;
+    transition: border-color 0.3s ease;
+
+    &:focus {
+      outline: none;
+      border-color: $primary-color;
+      box-shadow: 0 0 0.25rem rgba($primary-color, 0.6);
+    }
+  }
+
+  &__label {
+    font-weight: bold;
+    color: $secondary-color;
+    text-align: left;
+    display: block;
+    margin-bottom: 0.3125rem;
+  }
+
+  &__button {
+    background: $primary-color;
+    color: $text-light;
+    padding: 0.625rem;
+    border: none;
+    border-radius: 0.3125rem;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background 0.3s, box-shadow 0.2s;
+    margin-top: 0.625rem;
+    width: 100%;
+
+    &:hover {
+      background: darken($primary-color, 10%);
+      box-shadow: 0 0.25rem 0.5rem rgba($primary-color, 0.5);
+    }
+
+    &:focus {
+      outline: 2px solid lighten($primary-color, 20%);
+      box-shadow: 0 0 0.5rem rgba($primary-color, 0.7);
+    }
+  }
+
+  // ✅ 3-Column Grid for Checkboxes (Desktop)
+  &__interests-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    text-align: left;
+    margin-top: 1rem;
+    padding: 1rem;
+    background: lighten($primary-color, 40%);
+    border-radius: 0.3125rem;
+  }
+
+  &__checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    color: $text-dark;
+  }
+
+  &__checkbox {
+    width: 1.125rem;
+    height: 1.125rem;
+    accent-color: $primary-color;
+    transition: transform 0.2s ease;
+
+    &:hover {
+      transform: scale(1.1);
+    }
+
+    &:focus {
+      outline: 2px solid lighten($primary-color, 20%);
+      transform: scale(1.1);
+    }
+  }
+}
+
+// 🔄 Responsive Design
+@media (max-width: $desktop) {
+  .signup__container {
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: $tablet) {
+  .signup__container {
+    flex-direction: column;
+  }
+
+  .signup__interests-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: $mobile) {
+  .signup {
+    width: 95%;
+    padding: 1.5rem;
+  }
+
+  .signup__interests-grid {
+    grid-template-columns: repeat(1, 1fr); // Single column for small screens
+  }
+}

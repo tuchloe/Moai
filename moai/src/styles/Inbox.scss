@@ -1,0 +1,121 @@
+@import "./global.scss"; // Import global styles
+
+.inbox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100vh;
+  background: $bg-gradient;
+  padding: 2rem;
+
+  &__container {
+    display: flex;
+    width: 80%;
+    max-width: 1200px;
+    background: $card-bg;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+  }
+
+  /* ✅ Sidebar (Friends List) */
+  &__sidebar {
+    width: 30%;
+    padding: 1rem;
+    background: $secondary-color;
+    color: $text-light;
+    border-right: 2px solid darken($secondary-color, 10%);
+    
+    h2 {
+      text-align: center;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+
+      li {
+        padding: 0.8rem;
+        margin: 0.5rem 0;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background 0.3s;
+
+        &:hover,
+        &.active {
+          background: lighten($secondary-color, 10%);
+        }
+      }
+    }
+  }
+
+  /* ✅ Chat Section */
+  &__chat {
+    width: 70%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 1rem;
+
+    h2 {
+      text-align: center;
+      color: $secondary-color;
+    }
+  }
+
+  /* ✅ Messages */
+  &__messages {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    .sent {
+      align-self: flex-end;
+      background: $primary-color;
+      color: $text-light;
+      padding: 0.6rem;
+      border-radius: 10px;
+      max-width: 60%;
+    }
+
+    .received {
+      align-self: flex-start;
+      background: lighten($primary-color, 30%);
+      padding: 0.6rem;
+      border-radius: 10px;
+      max-width: 60%;
+    }
+  }
+
+  /* ✅ Message Input */
+  &__form {
+    display: flex;
+    padding: 1rem;
+    background: $bg-light;
+    border-top: 1px solid $border-color;
+
+    input {
+      flex-grow: 1;
+      padding: 0.8rem;
+      border-radius: 5px;
+      border: 1px solid $border-color;
+    }
+
+    button {
+      margin-left: 1rem;
+      padding: 0.8rem 1.2rem;
+      background: $primary-color;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+
+      &:hover {
+        background: darken($primary-color, 10%);
+      }
+    }
+  }
+}

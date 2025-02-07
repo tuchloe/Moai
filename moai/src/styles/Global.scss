@@ -1,0 +1,159 @@
+@import url("https://fonts.googleapis.com/css2?family=Hanuman:wght@400;700&display=swap");
+
+// 🎨 Theme Colors
+$primary-color: #fa8d43; // Updated darker orange for theme
+$secondary-color: #1e3a5f;
+$bg-light: #ffffff;
+$bg-dark: #1e1e1e;
+$card-bg: #f5f5f5;
+$text-light: #fff;
+$text-dark: #222;
+$border-color: #ddd;
+$bg-gradient: linear-gradient(to bottom, #fde8cc, #f6c391); 
+$text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3); 
+
+// 📱 Breakpoints
+$tablet: 900px;
+$mobile: 600px;
+
+// 🔄 Reset & Global Font
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Hanuman", sans-serif;
+  background-color: $bg-light;
+  color: $text-dark;
+  line-height: 1.6;
+}
+
+// ✅ Input Fields (Global Styling)
+input,
+textarea,
+select {
+  font-family: inherit; /* Match global font */
+  font-size: 1rem;
+  padding: 0.8rem;
+  border: 1px solid $border-color;
+  border-radius: 5px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+  &:focus {
+    border-color: $primary-color; /* Highlight on focus */
+    box-shadow: 0 0 4px rgba($primary-color, 0.5); /* Subtle glow effect */
+    outline: none;
+  }
+
+  &:hover {
+    border-color: darken($primary-color, 20%); /* Darker border on hover */
+  }
+}
+
+// ✅ Buttons (Global Styling)
+.button {
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: bold;
+  padding: 0.8rem 1.5rem;
+  color: $text-light;
+  background: $primary-color;
+  border: 2px solid $primary-color;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+
+  &:hover {
+    background: darken($primary-color, 10%);
+    border-color: darken($primary-color, 20%);
+  }
+
+  &:disabled {
+    background: lighten($border-color, 30%);
+    color: $border-color;
+    cursor: not-allowed;
+    border-color: $border-color;
+  }
+
+  &--secondary {
+    background: $secondary-color;
+    border: 2px solid $secondary-color;
+    color: $text-light;
+
+    &:hover {
+      background: lighten($secondary-color, 10%);
+      border-color: lighten($secondary-color, 10%);
+    }
+  }
+
+  &--outline {
+    background: transparent;
+    color: $primary-color;
+    border: 2px solid $primary-color;
+
+    &:hover {
+      background: $primary-color;
+      color: $text-light;
+    }
+  }
+}
+
+// ✅ Typography Classes
+.text {
+  &--center {
+    text-align: center;
+  }
+
+  &--bold {
+    font-weight: bold;
+  }
+
+  &--large {
+    font-size: 2rem;
+    color: $primary-color;
+  }
+
+  &--medium {
+    font-size: 1.5rem;
+    color: $secondary-color;
+  }
+
+  &--small {
+    font-size: 0.9rem;
+    color: $text-dark;
+  }
+}
+
+// ✅ Cards
+.card {
+  background: $card-bg;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+// 📱 Responsive Design Utilities
+@media (max-width: $tablet) {
+  body {
+    font-size: 1rem; /* Adjust font size for tablets */
+  }
+}
+
+@media (max-width: $mobile) {
+  body {
+    font-size: 0.9rem; /* Adjust font size for smaller screens */
+  }
+
+  .button {
+    font-size: 0.9rem;
+    padding: 0.6rem 1rem;
+  }
+
+  input {
+    padding: 0.6rem;
+  }
+}

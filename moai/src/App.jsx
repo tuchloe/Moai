@@ -1,27 +1,30 @@
-import './App.css'
-import React, { useEffect, useState } from 'react';
-import api from './../api.js';
+import { Routes, Route } from "react-router-dom";
+import ProtectedRoute from "./components/ProtectedRoute";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import Dashboard from "./pages/Dashboard";
+import Profile from "./pages/Profile";
+import MeetSomeoneNew from "./pages/MeetSomeoneNew";
+import Inbox from "./pages/Inbox";
 
 function App() {
-  const [dbStatus, setDbStatus] = useState('Checking database connection...');
-
-  useEffect(() => {
-    // Use the Axios instance to make a request to the backend
-    api.get('/test-db')
-      .then((response) => {
-        setDbStatus(response.data); // Update the state with the response
-      })
-      .catch((error) => {
-        console.error('Error connecting to backend:', error);
-        setDbStatus('Failed to connect to the database.');
-      });
-  }, []);
-
   return (
-    <div>
-      <h1>Welcome to Moai</h1>
-      <p>Database Status: {dbStatus}</p>
-    </div>
+    <Routes>
+      {/* Public Routes */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<Signup />} />
+
+      {/* Protected Routes */}
+      <Route element={<ProtectedRoute />}>
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/meet-someone-new" element={<MeetSomeoneNew />} />
+        <Route path="/inbox" element={<Inbox />} />
+      </Route>
+
+      {/* Default Route */}
+      <Route path="*" element={<Login />} />
+    </Routes>
   );
 }
 

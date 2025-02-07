@@ -1,0 +1,116 @@
+@import "./global.scss";
+
+.profile {
+  background: $bg-gradient;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+
+  .profile__content {
+    max-width: 900px;
+    width: 100%;
+    margin-top: 4rem; // Add padding to prevent overlap with header
+  }
+
+  /* Top Section */
+  .profile__top {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    margin-bottom: 2rem;
+
+    @media (max-width: $tablet) {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+  }
+
+  .profile__picture {
+    border-radius: 1rem;
+    width: 200px;
+    height: 150px;
+    object-fit: cover;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .profile__info {
+    h1 {
+      font-size: 1.8rem;
+      font-family: "Hanuman", sans-serif;
+    }
+
+    .profile__location,
+    .profile__languages {
+      font-size: 1.2rem;
+    }
+  }
+
+  .profile__divider {
+    margin: 1.5rem 0;
+    border: none;
+    height: 1px;
+    background: $text-dark;
+  }
+
+  /* Bottom Section */
+  .profile__bottom {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+
+    @media (max-width: $tablet) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .profile__edit-button {
+    grid-column: span 2;
+    background: $primary-color;
+    color: white;
+    font-size: 1.2rem;
+    padding: 0.8rem 1.5rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background 0.3s;
+
+    &:hover {
+      background: lighten($primary-color, 10%);
+    }
+  }
+
+  .profile__bio {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    &-header {
+      font-weight: bold;
+    }
+
+    &-text {
+      text-align: justify;
+    }
+  }
+
+  .profile__gallery {
+    position: relative;
+    text-align: center;
+
+    .profile__gallery-image {
+      width: 100%;
+      border-radius: 0.5rem;
+    }
+
+    .profile__gallery-text {
+      position: absolute;
+      bottom: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1.5rem;
+      color: white;
+      text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+    }
+  }
+}

@@ -1,0 +1,102 @@
+@import "./global.scss"; // Import global styles
+
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  min-height: 100vh;
+  background: $bg-gradient; // Subtle orange gradient background
+  padding: 2rem;
+
+  &__heading {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3rem; // Increased vertical spacing between grid and other elements
+    width: 100%;
+    max-width: 800px;
+    margin-top: 9rem; // Increased top padding to avoid overlap with header
+    padding-bottom: 2rem; // Extra space for scrolling
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); // 3 columns for desktop
+    grid-template-rows: repeat(2, 1fr); // 2 rows
+    gap: 6rem; // Double the gap between buttons
+    width: 100%;
+
+    @media (max-width: $tablet) {
+      grid-template-columns: 1fr 1fr; // 2 columns for tablets
+      grid-template-rows: repeat(3, 1fr);
+      gap: 3rem; // Slightly reduced gap for smaller screens
+    }
+
+    @media (max-width: $mobile) {
+      grid-template-columns: 1fr; // 1 column for mobile
+      grid-template-rows: auto;
+      gap: 2rem; // Adjust gap for smaller screens
+    }
+  }
+
+  &__button,
+  &__split-button--top,
+  &__split-button--bottom {
+    background: $primary-color;
+    color: $text-light;
+    font-family: "Hanuman", sans-serif;
+    font-size: 1.5rem;
+    padding: 1.5rem;
+    border: none;
+    border-radius: 1rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); // Ensured all buttons have drop shadows
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-shadow: $text-shadow;
+
+    &:hover {
+      background: darken($primary-color, 10%);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); // Hover effect
+    }
+
+    &:focus {
+      outline: 2px solid darken($primary-color, 20%);
+      background-color: lighten($primary-color, 20%); // Light background for focus
+      box-shadow: 0 0 6px darken($primary-color, 20%); // Focus glow
+    }
+  }
+
+  /* Settings and Log Out Buttons */
+  &__split-button {
+    display: flex;
+    flex-direction: column;
+    grid-column: 3 / 4; // Positioned in the bottom-right corner of the grid
+    grid-row: 2 / 3;
+    gap: 0.5rem; // Small gap between the buttons
+    height: 100%; // Matches the height of a single button
+
+    &--top,
+    &--bottom {
+      flex: 1; // Split height equally
+      font-size: 1.2rem;
+      transition: all 0.3s ease;
+
+      &--top {
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0; // Remove bottom corners for a flat edge
+      }
+
+      &--bottom {
+        border-top-left-radius: 0;
+        border-top-right-radius: 0; // Remove top corners for a flat edge
+      }
+    }
+  }
+}

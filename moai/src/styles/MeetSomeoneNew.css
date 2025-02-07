@@ -1,0 +1,173 @@
+@import url("https://fonts.googleapis.com/css2?family=Hanuman:wght@400;700&display=swap");
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Hanuman", sans-serif;
+  background-color: #ffffff;
+  color: #222;
+  line-height: 1.6;
+}
+
+input,
+textarea,
+select {
+  font-family: inherit; /* Match global font */
+  font-size: 1rem;
+  padding: 0.8rem;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: #fa8d43; /* Highlight on focus */
+  box-shadow: 0 0 4px rgba(250, 141, 67, 0.5); /* Subtle glow effect */
+  outline: none;
+}
+input:hover,
+textarea:hover,
+select:hover {
+  border-color: #d15806; /* Darker border on hover */
+}
+
+.button {
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: bold;
+  padding: 0.8rem 1.5rem;
+  color: #fff;
+  background: #fa8d43;
+  border: 2px solid #fa8d43;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+.button:hover {
+  background: #f96f11;
+  border-color: #d15806;
+}
+.button:disabled {
+  background: white;
+  color: #ddd;
+  cursor: not-allowed;
+  border-color: #ddd;
+}
+.button--secondary {
+  background: #1e3a5f;
+  border: 2px solid #1e3a5f;
+  color: #fff;
+}
+.button--secondary:hover {
+  background: #2a5286;
+  border-color: #2a5286;
+}
+.button--outline {
+  background: transparent;
+  color: #fa8d43;
+  border: 2px solid #fa8d43;
+}
+.button--outline:hover {
+  background: #fa8d43;
+  color: #fff;
+}
+
+.text--center {
+  text-align: center;
+}
+.text--bold {
+  font-weight: bold;
+}
+.text--large {
+  font-size: 2rem;
+  color: #fa8d43;
+}
+.text--medium {
+  font-size: 1.5rem;
+  color: #1e3a5f;
+}
+.text--small {
+  font-size: 0.9rem;
+  color: #222;
+}
+
+.card {
+  background: #f5f5f5;
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 900px) {
+  body {
+    font-size: 1rem; /* Adjust font size for tablets */
+  }
+}
+@media (max-width: 600px) {
+  body {
+    font-size: 0.9rem; /* Adjust font size for smaller screens */
+  }
+  .button {
+    font-size: 0.9rem;
+    padding: 0.6rem 1rem;
+  }
+  input {
+    padding: 0.6rem;
+  }
+}
+.meet-someone-new {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+}
+.meet-someone-new__heading {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #fa8d43;
+  text-align: center;
+}
+.meet-someone-new__profile {
+  background: #f5f5f5;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  width: 90%;
+  max-width: 900px;
+  text-align: center;
+}
+.meet-someone-new__profile-picture {
+  width: 200px;
+  height: 200px;
+  border-radius: 1rem;
+  -o-object-fit: cover;
+     object-fit: cover;
+  margin-bottom: 1rem;
+}
+.meet-someone-new__filter-button, .meet-someone-new__button-skip {
+  background: red;
+  color: #fff;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+.meet-someone-new__filter-button:hover, .meet-someone-new__button-skip:hover {
+  background: darkred;
+}
+.meet-someone-new__filter-modal, .meet-someone-new__message-modal {
+  position: fixed;
+  top: 20%;
+  left: 50%;
+  transform: translate(-50%, -20%);
+  background: #ffffff;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+}/*# sourceMappingURL=MeetSomeoneNew.css.map */
