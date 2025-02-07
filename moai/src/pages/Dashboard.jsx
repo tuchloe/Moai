@@ -1,10 +1,37 @@
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Header from "../components/Header/Header";
+import api from "../api/api"; // ✅ Import API instance
 import "../styles/Dashboard.scss";
+import { useAuth } from "../context/AuthContext"; // ✅ Import authentication context
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { user } = useAuth(); // ✅ Get logged-in user data
+
+  // ✅ Fetch & Show Friends List
+  const handleFriendsClick = async () => {
+    if (!user) {
+      alert("You must be logged in to view friends.");
+      return;
+    }
+
+    try {
+      const response = await api.get(`/api/friends/${user.id}`);
+      const friends = response.data;
+
+      if (friends.length === 0) {
+        alert("You currently have no friends added.");
+        return;
+      }
+
+      const friendNames = friends.map((friend) => `${friend.first_name} ${friend.last_name}`).join("\n");
+      alert(`Your Friends:\n${friendNames}`);
+    } catch (error) {
+      console.error("❌ Error fetching friends list:", error.response?.data || error.message);
+      alert("Failed to fetch friends. Please try again later.");
+    }
+  };
 
   // ✅ Show pop-up for "Help" and "Settings"
   const handleHelpOrSettingsClick = () => {
@@ -24,30 +51,27 @@ const Dashboard = () => {
     <>
       <Header />
       <main className="dashboard" aria-labelledby="dashboard-heading">
-        {/* Page Heading for ARIA */}
         <h1 id="dashboard-heading" className="dashboard__heading">
           Welcome to Your Dashboard
         </h1>
         <div className="dashboard__content">
-          {/* Main Button Grid */}
           <div className="dashboard__grid" role="menu" aria-label="Main Menu">
-            {/* Use Link components for better accessibility */}
-            <Link
-              to="/friends"
+            <button
               className="dashboard__button"
               aria-label="Go to My Friends"
               role="menuitem"
+              onClick={handleFriendsClick}
             >
               Friends
-            </Link>
-            <Link
-              to="/profile"
+            </button>
+            <button
               className="dashboard__button"
               aria-label="Go to Profile"
               role="menuitem"
+              onClick={() => navigate("/profile")}
             >
               Profile
-            </Link>
+            </button>
             <button
               className="dashboard__button"
               aria-label="Go to Inbox"
@@ -56,14 +80,14 @@ const Dashboard = () => {
             >
               Inbox
             </button>
-            <Link
-              to="/meet-someone-new"
+            <button
               className="dashboard__button"
               aria-label="Meet Someone New"
               role="menuitem"
+              onClick={() => navigate("/meet-someone-new")}
             >
               Meet Someone New
-            </Link>
+            </button>
             <button
               className="dashboard__button"
               aria-label="Get Help"
@@ -73,7 +97,6 @@ const Dashboard = () => {
               Help
             </button>
 
-            {/* Settings and Log Out Buttons */}
             <div
               className="dashboard__split-button"
               role="group"

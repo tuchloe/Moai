@@ -48,8 +48,8 @@ const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error("❌ Error fetching profile:", error.response?.data || error.message);
-      if (error.response?.status === 401) {
-        console.warn("⚠ Unauthorized. Logging out.");
+      if (error.response?.status === 401 || error.response?.status === 403) {
+        console.warn("⚠ Unauthorized or invalid token. Logging out.");
         logout();
       }
     } finally {

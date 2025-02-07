@@ -4,26 +4,39 @@ const dotenv = require("dotenv");
 dotenv.config();
 
 const verifyToken = (req, res, next) => {
-  let token = req.cookies?.token || req.headers["authorization"]; // ✅ Support for both Cookies & Authorization Header
+  try {
+    let token = req.cookies?.token || req.headers["authorization"];
 
-  if (!token) {
-    return res.status(401).json({ error: "Unauthorized: No token provided" });
-  }
-
-  // ✅ Ensure token format is correct (if using "Bearer" in Authorization header)
-  if (token.startsWith("Bearer ")) {
-    token = token.slice(7, token.length);
-  }
-
-  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-    if (err) {
-      console.error("❌ Token verification failed:", err.message);
-      return res.status(403).json({ error: "Forbidden: Invalid token" });
+    if (!token) {
+      console.warn("⚠ No token provided. Unauthorized request.");
+      return res.status(401).json({ error: "Unauthorized: No token provided" });
     }
 
-    req.user = decoded;
-    next();
-  });
+    // ✅ Ensure token format is correct (handle "Bearer" prefix)
+    if (token.startsWith("Bearer ")) {
+      token = token.slice(7, token.length);
+    }
+
+    // ✅ Verify JWT Token
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+      if (err) {
+        console.error("❌ Token verification failed:", err.message);
+
+        if (err.name === "TokenExpiredError") {
+          return res.status(403).json({ error: "Forbidden: Token has expired. Please log in again." });
+        }
+
+        return res.status(403).json({ error: "Forbidden: Invalid token" });
+      }
+
+      console.log("✅ Token verified successfully for user:", decoded.id);
+      req.user = decoded; // Attach decoded user data to request
+      next();
+    });
+  } catch (error) {
+    console.error("❌ Unexpected error in token verification:", error);
+    return res.status(500).json({ error: "Internal server error" });
+  }
 };
 
 module.exports = verifyToken;

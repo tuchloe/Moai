@@ -41,15 +41,12 @@ const Profile = () => {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        const rawText = await response.text(); // Capture raw response
-        console.log("🔍 Raw Response from Server:", rawText);
-
         if (!response.ok) {
           console.error(`❌ Failed to fetch profile: ${response.status} - ${response.statusText}`);
           throw new Error(`Failed to fetch profile: ${response.status}`);
         }
 
-        const data = JSON.parse(rawText);
+        const data = await response.json();
         console.log("✅ Received profile data:", data);
 
         setProfileData({
@@ -60,14 +57,18 @@ const Profile = () => {
           languages: data.languages || "",
           religion: data.religion || "",
           bio: data.bio || "",
-          interests: (() => {
-            try {
-              return data.interests && data.interests.trim() !== "" ? JSON.parse(data.interests) : [];
-            } catch (parseError) {
-              console.error("❌ Error parsing interests:", parseError);
-              return [];
-            }
-          })(),
+          interests: Array.isArray(data.interests) 
+            ? data.interests // ✅ Use it directly if already an array
+            : (() => {
+                try {
+                  return typeof data.interests === "string" && data.interests.trim() !== ""
+                    ? JSON.parse(data.interests) 
+                    : [];
+                } catch (parseError) {
+                  console.error("❌ Error parsing interests:", parseError);
+                  return [];
+                }
+              })(),
         });
       } catch (error) {
         console.error("❌ Error fetching profile data:", error);
@@ -110,7 +111,7 @@ const Profile = () => {
         },
         body: JSON.stringify({
           ...profileData,
-          interests: JSON.stringify(profileData.interests),
+          interests: JSON.stringify(profileData.interests), // ✅ Convert to string before sending
         }),
       });
 
@@ -124,14 +125,18 @@ const Profile = () => {
 
       setProfileData({
         ...updatedData,
-        interests: (() => {
-          try {
-            return updatedData.interests && updatedData.interests.trim() !== "" ? JSON.parse(updatedData.interests) : [];
-          } catch (parseError) {
-            console.error("❌ Error parsing updated interests:", parseError);
-            return [];
-          }
-        })(),
+        interests: Array.isArray(updatedData.interests) 
+          ? updatedData.interests
+          : (() => {
+              try {
+                return typeof updatedData.interests === "string" && updatedData.interests.trim() !== ""
+                  ? JSON.parse(updatedData.interests)
+                  : [];
+              } catch (parseError) {
+                console.error("❌ Error parsing updated interests:", parseError);
+                return [];
+              }
+            })(),
       });
 
       setIsEditing(false);

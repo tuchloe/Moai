@@ -12,28 +12,56 @@ const MeetSomeoneNew = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [showMessageModal, setShowMessageModal] = useState(false);
   const [messageContent, setMessageContent] = useState("");
+  const [loading, setLoading] = useState(false); // ✅ Added loading state
 
-  // 🔍 Fetch a random profile based on filters and location
+  // 🔍 Fetch a random profile based on filters
   const fetchProfile = async () => {
     try {
-      const response = await api.get("/api/users/meet-someone-new", { params: { ...filters } });
-      setProfile(response.data);
+      setLoading(true);
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        console.error("❌ No token found in localStorage. Cannot fetch profile.");
+        return;
+      }
+
+      // ✅ Remove empty filters before sending request
+      const validFilters = Object.fromEntries(
+        Object.entries(filters).filter(([_, value]) => value !== "" && value !== null)
+      );
+
+      console.log("🔍 Fetching profile with filters:", validFilters);
+
+      const response = await api.get("/api/users/meet-someone-new", {
+        headers: { Authorization: `Bearer ${token}` },
+        params: validFilters,
+      });
+
+      if (response.status === 200) {
+        console.log("✅ Fetched profile:", response.data);
+        setProfile(response.data);
+      } else {
+        console.warn("⚠ Unexpected response when fetching profile:", response);
+      }
     } catch (error) {
       console.error("❌ Error fetching profile:", error.response?.data || error);
       setProfile(null);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchProfile();
-  }, [filters]);
+  }, []);
 
   // ✅ Handle filter changes
   const handleFilterChange = (e) => {
     const { name, value } = e.target;
-    setFilters({ ...filters, [name]: value });
+    setFilters((prev) => ({ ...prev, [name]: value }));
   };
 
+  // ✅ Handle interest selection
   const handleInterestChange = (e) => {
     const { value, checked } = e.target;
     setFilters((prev) => ({
@@ -44,7 +72,7 @@ const MeetSomeoneNew = () => {
     }));
   };
 
-  // ✅ Skip profile
+  // ✅ Skip current profile & fetch another
   const handleSkip = () => fetchProfile();
 
   // ✅ Open/Close Message Modal
@@ -54,15 +82,26 @@ const MeetSomeoneNew = () => {
   // ✅ Send a message
   const handleSendMessage = async () => {
     if (!messageContent.trim()) {
-      alert("Message cannot be empty!");
+      alert("⚠ Message cannot be empty!");
       return;
     }
+
     try {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        console.error("❌ No token found. Cannot send message.");
+        return;
+      }
+
       await api.post("/api/messages/send", {
         receiver_account_id: profile.account_id,
         content: messageContent,
+      }, {
+        headers: { Authorization: `Bearer ${token}` },
       });
-      alert("Message sent!");
+
+      alert("✅ Message sent!");
       setMessageContent("");
       closeMessageModal();
     } catch (error) {
@@ -74,17 +113,15 @@ const MeetSomeoneNew = () => {
     <>
       <Header />
       <div className="meet-someone-new">
-        <button
-          className="meet-someone-new__filter-button"
-          onClick={() => setShowFilters(true)}
-          aria-label="Open filter options"
-        >
+        {/* 🔹 FILTER BUTTON */}
+        <button className="meet-someone-new__filter-button" onClick={() => setShowFilters(true)}>
           Filter Profiles
         </button>
 
+        {/* 🔹 FILTER MODAL */}
         {showFilters && (
-          <div className="meet-someone-new__filter-modal" aria-labelledby="filter-heading">
-            <h2 id="filter-heading">Apply Filters</h2>
+          <div className="meet-someone-new__filter-modal">
+            <h2>Apply Filters</h2>
             <label>
               Language:
               <input type="text" name="language" value={filters.language} onChange={handleFilterChange} />
@@ -112,22 +149,22 @@ const MeetSomeoneNew = () => {
           </div>
         )}
 
-        {profile ? (
+        {/* 🔹 PROFILE DISPLAY */}
+        {loading ? (
+          <p>Loading profile...</p>
+        ) : profile ? (
           <div className="meet-someone-new__profile">
             <img
               src={"Gramps.svg"}
-              alt="Image upload function is not available yet. I intend to implement Cloudinary in the future."
+              alt="Profile picture is not available yet. Image upload will be implemented in the future."
               className="meet-someone-new__profile-picture"
             />
-            <h2>
-              {profile.first_name} {profile.last_name}, {profile.age} years old
-            </h2>
+            <h2>{profile.first_name} {profile.last_name}, {profile.age} years old</h2>
             <p>{profile.location}</p>
             <p>{profile.languages}</p>
             <p>{profile.religion}</p>
             <div className="meet-someone-new__bio">{profile.bio}</div>
             <div className="meet-someone-new__actions">
-              {/* ✅ Replace inline Add Friend button with AddFriendButton component */}
               <AddFriendButton friendId={profile.account_id} />
               <button onClick={openMessageModal}>Send a Message</button>
               <button onClick={handleSkip}>Skip Profile</button>
@@ -137,13 +174,10 @@ const MeetSomeoneNew = () => {
           <p>No profiles available.</p>
         )}
 
+        {/* 🔹 MESSAGE MODAL */}
         {showMessageModal && (
           <div className="meet-someone-new__message-modal">
-            <textarea
-              value={messageContent}
-              onChange={(e) => setMessageContent(e.target.value)}
-              placeholder="Type your message"
-            />
+            <textarea value={messageContent} onChange={(e) => setMessageContent(e.target.value)} placeholder="Type your message" />
             <button onClick={handleSendMessage}>Send</button>
             <button onClick={closeMessageModal}>Cancel</button>
           </div>
