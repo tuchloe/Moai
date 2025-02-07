@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import api from "../api/api"; // Axios instance for API calls
 import { useAuth } from "../context/AuthContext";
 import Header from "../components/Header/Header";
+import AddFriendButton from "../components/AddFriendButton"; // ✅ Import AddFriendButton
 import "../styles/MeetSomeoneNew.scss";
 
 const MeetSomeoneNew = () => {
@@ -45,16 +46,6 @@ const MeetSomeoneNew = () => {
 
   // ✅ Skip profile
   const handleSkip = () => fetchProfile();
-
-  // ✅ Send Friend Request
-  const handleFriendRequest = async () => {
-    try {
-      await api.post("/api/friends/request", { friend_account_id: profile.account_id });
-      alert("Friend request sent!");
-    } catch (error) {
-      console.error("❌ Error sending friend request:", error.response?.data || error);
-    }
-  };
 
   // ✅ Open/Close Message Modal
   const openMessageModal = () => setShowMessageModal(true);
@@ -136,7 +127,8 @@ const MeetSomeoneNew = () => {
             <p>{profile.religion}</p>
             <div className="meet-someone-new__bio">{profile.bio}</div>
             <div className="meet-someone-new__actions">
-              <button onClick={handleFriendRequest}>Add Friend</button>
+              {/* ✅ Replace inline Add Friend button with AddFriendButton component */}
+              <AddFriendButton friendId={profile.account_id} />
               <button onClick={openMessageModal}>Send a Message</button>
               <button onClick={handleSkip}>Skip Profile</button>
             </div>
