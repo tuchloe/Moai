@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import api from "../api/api"; // Axios instance for API calls
 import { useAuth } from "../context/AuthContext";
 import Header from "../components/Header/Header";
-import AddFriendButton from "../components/AddFriendButton"; // ✅ Import AddFriendButton
+import AddFriendButton from "../components/AddFriend"; // ✅ Import AddFriendButton
 import "../styles/MeetSomeoneNew.scss";
 
 const MeetSomeoneNew = () => {

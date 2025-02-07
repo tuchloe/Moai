@@ -14,6 +14,8 @@ const Signup = () => {
     email: "",
     password: "",
     age: "",
+    languages: "",
+    religion: "",
     interests: [],
   });
 
@@ -61,6 +63,7 @@ const Signup = () => {
         ...formData,
         location,
         interests: JSON.stringify(formData.interests),
+        languages: JSON.stringify(formData.languages.split(",")), // Convert to array
       });
 
       login(response.data.token, response.data.userId); // ✅ Log in user after signup
@@ -81,102 +84,45 @@ const Signup = () => {
           <div className="signup__left">
             <div className="signup__name-row">
               <div>
-                <label htmlFor="first_name" className="signup__label">
-                  First Name:
-                </label>
-                <input
-                  type="text"
-                  id="first_name"
-                  name="first_name"
-                  className="signup__input"
-                  placeholder="First name"
-                  onChange={handleChange}
-                  aria-required="true"
-                />
+                <label htmlFor="first_name" className="signup__label">First Name:</label>
+                <input type="text" id="first_name" name="first_name" className="signup__input" placeholder="First name" onChange={handleChange} aria-required="true" />
               </div>
               <div>
-                <label htmlFor="last_name" className="signup__label">
-                  Last Name:
-                </label>
-                <input
-                  type="text"
-                  id="last_name"
-                  name="last_name"
-                  className="signup__input"
-                  placeholder="Last name"
-                  onChange={handleChange}
-                  aria-required="true"
-                />
+                <label htmlFor="last_name" className="signup__label">Last Name:</label>
+                <input type="text" id="last_name" name="last_name" className="signup__input" placeholder="Last name" onChange={handleChange} aria-required="true" />
               </div>
             </div>
 
-            <label htmlFor="age" className="signup__label">
-              Age:
-            </label>
-            <input
-              type="number"
-              id="age"
-              name="age"
-              className="signup__input"
-              placeholder="Enter age"
-              onChange={handleChange}
-              aria-required="true"
-            />
+            <label htmlFor="age" className="signup__label">Age:</label>
+            <input type="number" id="age" name="age" className="signup__input" placeholder="Enter age" onChange={handleChange} aria-required="true" />
 
-            <label htmlFor="email" className="signup__label">
-              Email:
-            </label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              className="signup__input"
-              placeholder="Enter email"
-              onChange={handleChange}
-              aria-required="true"
-            />
+            <label htmlFor="email" className="signup__label">Email:</label>
+            <input type="email" id="email" name="email" className="signup__input" placeholder="Enter email" onChange={handleChange} aria-required="true" />
 
-            <label htmlFor="password" className="signup__label">
-              Password:
-            </label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              className="signup__input"
-              placeholder="Enter password"
-              onChange={handleChange}
-              aria-required="true"
-            />
+            <label htmlFor="password" className="signup__label">Password:</label>
+            <input type="password" id="password" name="password" className="signup__input" placeholder="Enter password" onChange={handleChange} aria-required="true" />
           </div>
 
           <div className="signup__right">
+            <label htmlFor="languages" className="signup__label">Languages Spoken:</label>
+            <input type="text" id="languages" name="languages" className="signup__input" placeholder="E.g. English, Spanish, French" onChange={handleChange} />
+
+            <label htmlFor="religion" className="signup__label">Religion:</label>
+            <input type="text" id="religion" name="religion" className="signup__input" placeholder="Enter your religion" onChange={handleChange} />
+
             <fieldset className="signup__interests">
               <legend className="signup__label">Select Your Interests:</legend>
               <div className="signup__interests-grid">
                 {interestOptions.map((interest) => (
                   <label key={interest} className="signup__checkbox-label">
-                    <input
-                      type="checkbox"
-                      name="interests"
-                      value={interest}
-                      onChange={handleInterestChange}
-                      className="signup__checkbox"
-                      aria-checked={formData.interests.includes(interest)}
-                    />
+                    <input type="checkbox" name="interests" value={interest} onChange={handleInterestChange} className="signup__checkbox" aria-checked={formData.interests.includes(interest)} />
                     {interest}
                   </label>
                 ))}
               </div>
             </fieldset>
 
-            <button
-              type="submit"
-              className="signup__button"
-              aria-label="Sign up"
-            >
-              Sign Up
-            </button>
+            <button type="submit" className="signup__button" aria-label="Sign up">Sign Up</button>
           </div>
         </div>
 

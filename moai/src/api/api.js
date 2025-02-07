@@ -4,22 +4,25 @@ import axios from "axios";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
 const api = axios.create({
-  baseURL: API_BASE_URL, // ✅ Uses VITE_API_BASE_URL or fallback
+  baseURL: API_BASE_URL,
   headers: {
-    "Content-Type": "application/json", // Ensure all requests use JSON
+    "Content-Type": "application/json",
   },
 });
 
-// ✅ Automatically attach the Authorization token (if available)
+// ✅ Automatically attach the Authorization token to every request
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token"); // Retrieve the token from local storage
+    const token = localStorage.getItem("token");
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`; // Attach the token to Authorization header
+      console.log("🔑 Attaching token to request:", token); // Debugging log
+      config.headers.Authorization = `Bearer ${token}`;
+    } else {
+      console.warn("⚠ No token found in localStorage when making request");
     }
     return config;
   },
-  (error) => Promise.reject(error) // Reject promise on error
+  (error) => Promise.reject(error)
 );
 
 export default api;

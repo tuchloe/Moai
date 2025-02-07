@@ -4,7 +4,7 @@ const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
 const mysql = require("mysql2/promise");
 const axios = require("axios");
-const verifyToken = require("../middleware/authMiddleware"); // Middleware for protected routes
+const verifyToken = require("../middleware/authMiddleware");
 
 dotenv.config();
 
@@ -24,11 +24,19 @@ const db = mysql.createPool({
 // ✅ Function to Fetch User Location from IP-API
 const getLocationFromIP = async (ip) => {
   try {
+    console.log(`🌍 Fetching location for IP: ${ip}`);
     const response = await axios.get(`http://ip-api.com/json/${ip}`);
-    return response.data.status === "success" ? response.data.city : "Unknown";
+
+    if (response.data.status === "success" && response.data.city) {
+      console.log(`✅ Location found: ${response.data.city}`);
+      return response.data.city;
+    } else {
+      console.warn("⚠ IP-API did not return a valid location.");
+      return null;
+    }
   } catch (error) {
     console.error("❌ Error fetching location:", error);
-    return "Unknown";
+    return null;
   }
 };
 
@@ -39,7 +47,7 @@ router.post("/register", async (req, res) => {
 
     const { email, password, first_name, last_name, age, interests, religion, languages } = req.body;
     const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-    const location = await getLocationFromIP(ip);
+    const location = await getLocationFromIP(ip) || "Unknown";
 
     if (!email || !password || !first_name || !last_name || !age) {
       return res.status(400).json({ error: "All required fields must be filled." });
@@ -57,7 +65,18 @@ router.post("/register", async (req, res) => {
     await db.query(
       `INSERT INTO Users (account_id, email, password, first_name, last_name, age, location, interests, religion, languages, created_at) 
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
-      [account_id, email, hashedPassword, first_name, last_name, age, location, JSON.stringify(interests), religion, JSON.stringify(languages)]
+      [
+        account_id,
+        email,
+        hashedPassword,
+        first_name,
+        last_name,
+        age,
+        location,
+        JSON.stringify(interests || []), // Ensure interests are stored as JSON
+        religion || null,
+        JSON.stringify(languages || []), // Ensure languages are stored as JSON
+      ]
     );
 
     res.status(201).json({ message: "✅ User registered successfully!", userId: account_id });
@@ -74,7 +93,7 @@ router.post("/login", async (req, res) => {
 
     const { email, password } = req.body;
     const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-    const location = await getLocationFromIP(ip);
+    const newLocation = await getLocationFromIP(ip); // ✅ Fetch location from IP-API
 
     if (!email || !password) return res.status(400).json({ error: "Email and password are required." });
 
@@ -91,15 +110,21 @@ router.post("/login", async (req, res) => {
     // 🔑 Generate JWT Token
     const token = jwt.sign({ id: user.account_id, email: user.email }, process.env.JWT_SECRET, { expiresIn: "1h" });
 
-    // 🍪 Store token in HTTP-only cookie
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "Strict",
-    });
+    // ✅ Update User Location in Database (only if a valid new location is found)
+    if (newLocation && newLocation !== "Unknown") {
+      console.log(`📍 Updating user location in database: ${newLocation}`);
+      await db.query("UPDATE Users SET location = ? WHERE account_id = ?", [newLocation, user.account_id]);
+    }
 
-    // ✅ Update User Location in Database on Login
-    await db.query("UPDATE Users SET location = ? WHERE account_id = ?", [location, user.account_id]);
+    // ✅ Fix: Ensure interests & languages are parsed correctly
+    let interests = [];
+    let languages = [];
+    try {
+      interests = JSON.parse(user.interests || "[]");
+      languages = JSON.parse(user.languages || "[]");
+    } catch (parseError) {
+      console.error("❌ Error parsing JSON fields:", parseError);
+    }
 
     res.json({
       message: "✅ Login successful!",
@@ -109,10 +134,10 @@ router.post("/login", async (req, res) => {
         first_name: user.first_name,
         last_name: user.last_name,
         age: user.age,
-        location: location,
-        interests: JSON.parse(user.interests || "[]"),
+        location: newLocation || user.location, // ✅ Use updated location if available
+        interests,
         religion: user.religion,
-        languages: JSON.parse(user.languages || "[]"),
+        languages,
         email: user.email,
       },
     });
@@ -120,12 +145,6 @@ router.post("/login", async (req, res) => {
     console.error("❌ Login error:", error);
     res.status(500).json({ error: "Internal server error" });
   }
-});
-
-// ✅ LOGOUT ROUTE
-router.post("/logout", (req, res) => {
-  res.clearCookie("token");
-  res.json({ message: "✅ Logged out successfully!" });
 });
 
 // ✅ PROTECTED USER PROFILE ROUTE
@@ -142,15 +161,38 @@ router.get("/profile", verifyToken, async (req, res) => {
     if (users.length === 0) return res.status(404).json({ error: "User not found" });
 
     const user = users[0];
-    user.interests = JSON.parse(user.interests || "[]");
-    user.languages = JSON.parse(user.languages || "[]");
 
-    res.json(user);
+    // ✅ Fix: Ensure interests & languages are parsed correctly
+    let interests = [];
+    let languages = [];
+    try {
+      interests = JSON.parse(user.interests || "[]");
+      languages = JSON.parse(user.languages || "[]");
+    } catch (parseError) {
+      console.error("❌ Error parsing JSON fields:", parseError);
+    }
+
+    res.json({
+      id: user.account_id,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      age: user.age,
+      location: user.location,
+      interests,
+      religion: user.religion,
+      languages,
+      email: user.email,
+    });
   } catch (error) {
     console.error("❌ Profile fetch error:", error);
     res.status(500).json({ error: "Internal server error" });
   }
 });
 
-module.exports = router;
+// ✅ LOGOUT ROUTE
+router.post("/logout", (req, res) => {
+  res.clearCookie("token");
+  res.json({ message: "✅ Logged out successfully!" });
+});
 
+module.exports = router;

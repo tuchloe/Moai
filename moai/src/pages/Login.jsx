@@ -1,23 +1,26 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import Header from "../components/Header/Header"; // ✅ Import the Header component
+import Header from "../components/Header/Header"; // ✅ Import Header
 import "../styles/Login.scss";
-import api from "../api/api"; // ✅ Axios instance for API calls
+import api from "../api/api"; // ✅ Axios instance
+import { useAuth } from "../context/AuthContext"; // ✅ Import useAuth for login()
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login } = useAuth(); // ✅ Get login() function from AuthContext
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [errorMessage, setErrorMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  // ✅ Check if the user is already logged in
+  // ✅ Redirect if already logged in
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) {
-      navigate("/dashboard", { replace: true }); // ✅ Prevents back navigation to login
+      navigate("/dashboard", { replace: true });
     }
   }, [navigate]);
 
-  // ✅ Handle input field changes
+  // ✅ Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -26,6 +29,7 @@ const Login = () => {
   // ✅ Fetch User Location from IP-API
   const getLocationFromIP = async () => {
     try {
+      console.log("🌍 Fetching user location from IP-API...");
       const response = await api.get("http://ip-api.com/json/");
       return response.data.city || "Unknown";
     } catch (error) {
@@ -37,30 +41,48 @@ const Login = () => {
   // ✅ Handle login submission
   const handleLogin = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
-      const location = await getLocationFromIP(); // ✅ Fetch user location before login request
+      console.log("🚀 Attempting login...");
 
-      const response = await api.post("/api/auth/login", { 
-        ...formData, 
-        location 
+      // ✅ Fetch user location **before** sending login request
+      const location = await getLocationFromIP();
+
+      const response = await api.post("/api/auth/login", {
+        ...formData,
+        location, // ✅ Send location to backend
       });
 
+      console.log("✅ Login Response:", response.data); // ✅ Debug response
+
       const { token, user } = response.data;
+      if (!token || !user.id) {
+        throw new Error("❌ Missing token or user ID in response.");
+      }
 
       // ✅ Store authentication data
+      console.log("📝 Storing token & userId...");
       localStorage.setItem("token", token);
       localStorage.setItem("userId", user.id);
 
-      // ✅ Redirect user to dashboard after successful login
+      // ✅ Use login() from AuthContext
+      console.log("🔄 Calling AuthContext login()...");
+      await login(token, user.id);
+
+      // ✅ Redirect to dashboard
+      console.log("🚀 Redirecting to dashboard...");
       navigate("/dashboard");
     } catch (error) {
+      console.error("❌ Login error:", error.response?.data || error.message);
       setErrorMessage(error.response?.data?.error || "An error occurred. Please try again.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="login">
-      {/* ✅ Header Component */}
+      {/* ✅ Header */}
       <Header />
 
       <div className="login__content">
@@ -123,8 +145,8 @@ const Login = () => {
               >
                 Create an Account
               </button>
-              <button type="submit" className="button login__submit-button">
-                Log in
+              <button type="submit" className="button login__submit-button" disabled={loading}>
+                {loading ? "Logging in..." : "Log in"}
               </button>
             </div>
           </form>

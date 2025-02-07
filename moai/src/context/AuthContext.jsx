@@ -1,68 +1,59 @@
 import { useState, useEffect, createContext, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import api from "../api/api";
 
 const AuthContext = createContext(null);
 
 const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null); // Stores user data
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
+    const accountId = localStorage.getItem("userId");
 
-    if (!token) {
-      console.warn("⚠ No token found in localStorage. Redirecting to login.");
+    if (!token || !accountId) {
+      console.warn("⚠ No token or accountId found. Redirecting to login.");
       logout();
       return;
     }
 
-    fetchUserProfile(token); // Fetch profile if token exists
+    fetchUserProfile(token, accountId);
   }, []);
 
-  // ✅ Fetch and update user location using IP API
-  const updateLocation = async (accountId) => {
-    try {
-      const response = await axios.get("http://ip-api.com/json");
-      if (response.data.city) {
-        await api.post("/api/location/update", {
-          accountId,
-          city: response.data.city,
-        });
-      }
-    } catch (error) {
-      console.error("❌ Error updating location:", error);
-    }
-  };
-
   // ✅ Fetch user profile from backend
-  const fetchUserProfile = async (token) => {
-    if (!token) {
-      console.error("❌ No token found. Cannot fetch profile.");
-      logout();
+  const fetchUserProfile = async (token, accountId) => {
+    token = token || localStorage.getItem("token");
+
+    if (!token || !accountId) {
+      console.error("❌ No token or accountId found. Cannot fetch profile.");
+      setLoading(false);
       return;
     }
 
     try {
+      console.log("🔍 Fetching user profile with token:", token);
+      
+      // ✅ Ensure API request includes the token
       const response = await api.get("/api/auth/profile", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       if (response.status === 200) {
-        setUser(response.data); // Ensure the response includes account_id
+        console.log("✅ User profile fetched successfully.");
+        setUser({ ...response.data, account_id: accountId });
       } else {
-        console.warn("⚠ Unexpected response when fetching profile:", response);
-        logout();
+        console.warn("⚠ Unexpected response:", response);
       }
     } catch (error) {
       console.error("❌ Error fetching profile:", error.response?.data || error.message);
-      
-      // If 401 (Unauthorized), force logout
       if (error.response?.status === 401) {
         console.warn("⚠ Unauthorized. Logging out.");
         logout();
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -74,19 +65,16 @@ const AuthProvider = ({ children }) => {
     }
 
     try {
+      console.log("📝 Storing token & userId in localStorage...");
       localStorage.setItem("token", token);
+      localStorage.setItem("userId", accountId);
 
-      // Fetch and set user profile
-      const profileResponse = await api.get("/api/auth/profile", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      // ✅ Wait to ensure token is saved before making requests
+      await new Promise((resolve) => setTimeout(resolve, 500));
 
-      setUser({ token, account_id: accountId, ...profileResponse.data });
+      console.log("🔄 Fetching user profile after login...");
+      await fetchUserProfile(token, accountId);
 
-      // Update location in the backend
-      updateLocation(accountId);
-
-      // Redirect to dashboard
       navigate("/dashboard");
     } catch (error) {
       console.error("❌ Error during login:", error.response?.data || error.message);
@@ -95,12 +83,16 @@ const AuthProvider = ({ children }) => {
   };
 
   // ✅ Handle user logout
-  const logout = () => {
+  const logout = async () => {
     console.warn("🔴 Logging out user...");
     localStorage.removeItem("token");
+    localStorage.removeItem("userId");
     setUser(null);
+    setLoading(false);
     navigate("/login");
   };
+
+  if (loading) return null; // ✅ Prevents infinite loading screen
 
   return (
     <AuthContext.Provider value={{ user, login, logout }}>

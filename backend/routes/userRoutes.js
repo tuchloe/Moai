@@ -7,12 +7,33 @@ const router = express.Router();
 /* ✅ GET User Profile */
 router.get("/:id", verifyToken, async (req, res) => {
   try {
-    const [user] = await db.query(
-      "SELECT first_name AS name, age, location, languages, interests, bio, profile_picture AS profilePic FROM Users WHERE account_id = ?",
+    console.log("🟢 Fetching Profile for User ID:", req.params.id); // Debugging
+
+    const [users] = await db.query(
+      `SELECT first_name, last_name, age, location, languages, interests, bio, religion 
+       FROM Users WHERE account_id = ?`,
       [req.params.id]
     );
-    if (user.length === 0) return res.status(404).json({ error: "User not found" });
-    res.json(user[0]);
+
+    if (users.length === 0) {
+      console.error("❌ User not found:", req.params.id);
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    let user = users[0];
+
+    // ✅ Parse JSON fields (Interests & Languages)
+    try {
+      user.interests = user.interests ? JSON.parse(user.interests) : [];
+      user.languages = user.languages ? JSON.parse(user.languages) : [];
+    } catch (parseError) {
+      console.error("❌ Error parsing JSON fields:", parseError);
+      user.interests = [];
+      user.languages = [];
+    }
+
+    console.log("✅ User profile retrieved:", user);
+    res.json(user);
   } catch (error) {
     console.error("❌ Error fetching profile:", error);
     res.status(500).json({ error: "Internal server error" });
@@ -21,12 +42,28 @@ router.get("/:id", verifyToken, async (req, res) => {
 
 /* ✅ UPDATE User Profile */
 router.put("/:id", verifyToken, async (req, res) => {
-  const { name, age, location, languages, interests, bio, profilePic } = req.body;
+  const { first_name, last_name, age, location, languages, interests, bio, religion } = req.body;
+
   try {
+    console.log("📝 Updating profile for user:", req.params.id);
+
     await db.query(
-      "UPDATE Users SET first_name = ?, age = ?, location = ?, languages = ?, interests = ?, bio = ?, profile_picture = ? WHERE account_id = ?",
-      [name, age, location, languages, interests, bio, profilePic, req.params.id]
+      `UPDATE Users 
+       SET first_name = ?, last_name = ?, age = ?, location = ?, languages = ?, interests = ?, bio = ?, religion = ?
+       WHERE account_id = ?`,
+      [
+        first_name,
+        last_name,
+        age,
+        location,
+        JSON.stringify(languages || []), // ✅ Store JSON string safely
+        JSON.stringify(interests || []), // ✅ Store JSON string safely
+        bio,
+        religion,
+        req.params.id
+      ]
     );
+
     res.json({ message: "✅ Profile updated successfully" });
   } catch (error) {
     console.error("❌ Error updating profile:", error);
@@ -37,12 +74,15 @@ router.put("/:id", verifyToken, async (req, res) => {
 /* ✅ GET Random Local User with Filters */
 router.get("/meet-someone-new", verifyToken, async (req, res) => {
   try {
-    const { account_id } = req.user; // Get current user ID
+    const { account_id } = req.user;
     const { language, religion, interests } = req.query;
 
     // 🔍 Get current user's location
     const [currentUser] = await db.query("SELECT location FROM Users WHERE account_id = ?", [account_id]);
-    if (!currentUser.length) return res.status(404).json({ error: "User not found" });
+    if (!currentUser.length) {
+      console.error("❌ User not found for meet-someone-new:", account_id);
+      return res.status(404).json({ error: "User not found" });
+    }
 
     const location = currentUser[0].location;
 
@@ -61,16 +101,23 @@ router.get("/meet-someone-new", verifyToken, async (req, res) => {
     }
 
     if (interests) {
-      const interestArray = JSON.parse(interests);
-      query += ` AND JSON_OVERLAPS(interests, ?)`;
-      queryParams.push(JSON.stringify(interestArray));
+      try {
+        const interestArray = JSON.parse(interests);
+        query += ` AND JSON_OVERLAPS(interests, ?)`;
+        queryParams.push(JSON.stringify(interestArray));
+      } catch (parseError) {
+        console.error("❌ Error parsing interests filter:", parseError);
+      }
     }
 
     query += " ORDER BY RAND() LIMIT 1"; // Pick a random user
 
     const [users] = await db.query(query, queryParams);
 
-    if (!users.length) return res.status(404).json({ message: "No matches found." });
+    if (!users.length) {
+      console.warn("⚠ No matches found for:", { location, language, religion, interests });
+      return res.status(404).json({ message: "No matches found." });
+    }
 
     res.json(users[0]);
   } catch (error) {
@@ -87,7 +134,10 @@ router.post("/friend-request", verifyToken, async (req, res) => {
 
     // 🔍 Check if friend exists
     const [friend] = await db.query("SELECT account_id FROM Users WHERE account_id = ?", [friend_account_id]);
-    if (!friend.length) return res.status(404).json({ error: "User not found" });
+    if (!friend.length) {
+      console.error("❌ Friend not found:", friend_account_id);
+      return res.status(404).json({ error: "User not found" });
+    }
 
     // ❌ Prevent duplicate requests
     const [existingRequest] = await db.query(
@@ -95,7 +145,10 @@ router.post("/friend-request", verifyToken, async (req, res) => {
       [account_id, friend_account_id, friend_account_id, account_id]
     );
 
-    if (existingRequest.length > 0) return res.status(400).json({ error: "Friend request already sent or accepted." });
+    if (existingRequest.length > 0) {
+      console.warn("⚠ Friend request already exists between:", account_id, friend_account_id);
+      return res.status(400).json({ error: "Friend request already sent or accepted." });
+    }
 
     // ✅ Insert new friend request
     await db.query("INSERT INTO Friends (user_account_id, friend_account_id, status) VALUES (?, ?, 'Pending')", [account_id, friend_account_id]);
@@ -114,6 +167,7 @@ router.post("/send-message", verifyToken, async (req, res) => {
     const { receiver_account_id, content } = req.body;
 
     if (!content || content.trim() === "") {
+      console.warn("⚠ Message content cannot be empty.");
       return res.status(400).json({ error: "Message content cannot be empty." });
     }
 

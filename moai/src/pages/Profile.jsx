@@ -5,189 +5,207 @@ import "../styles/Profile.scss";
 import grampsImage from "../assets/gramps.jpeg"; // Hardcoded profile picture
 
 const Profile = () => {
-  const { user } = useAuth(); // Get the logged-in user's account_id
-  const [isEditing, setIsEditing] = useState(false); // Toggle edit mode
+  const { user } = useAuth();
+  const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState({
     first_name: "",
     last_name: "",
     age: "",
     location: "",
     languages: "",
+    religion: "",
     bio: "",
     interests: [],
   });
 
-  // Fetch profile data from the backend
+  const interestOptions = [
+    "Gardening", "Going for walks", "Reading", "Arts and crafts",
+    "Cooking/Baking", "Dancing", "Playing music", "Travelling",
+    "Sports and fitness", "Pets", "Fishing", "Bird watching",
+    "Pickleball", "Golfing", "Swimming", "Knitting",
+    "Woodworking", "Practicing my religion",
+  ];
+
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/users/${user.account_id}`);
+        const token = localStorage.getItem("token");
+        if (!token) {
+          console.error("❌ No token found in localStorage.");
+          return;
+        }
+
+        console.log("🔑 Sending request with token:", token);
+
+        const response = await fetch(`http://localhost:5000/api/users/${user.account_id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        if (!response.ok) {
+          const errorMessage = `Failed to fetch profile: ${response.status} - ${response.statusText}`;
+          console.error("❌", errorMessage);
+          throw new Error(errorMessage);
+        }
+
         const data = await response.json();
-        setProfileData(data);
+        console.log("✅ Received profile data:", data);
+
+        setProfileData({
+          first_name: data.first_name || "",
+          last_name: data.last_name || "",
+          age: data.age || "",
+          location: data.location || "",
+          languages: data.languages || "",
+          religion: data.religion || "",
+          bio: data.bio || "",
+          interests: (() => {
+            try {
+              return data.interests && data.interests.trim() !== "" ? JSON.parse(data.interests) : [];
+            } catch (parseError) {
+              console.error("❌ Error parsing interests:", parseError);
+              return [];
+            }
+          })(),
+        });
       } catch (error) {
-        console.error("Error fetching profile data:", error);
+        console.error("❌ Error fetching profile data:", error);
       }
     };
 
-    if (user?.account_id) {
-      fetchProfile();
-    }
+    if (user?.account_id) fetchProfile();
   }, [user?.account_id]);
 
-  // Handle input changes
   const handleChange = (e) => {
-    setProfileData({ ...profileData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setProfileData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handle interests separately (comma-separated values)
-  const handleInterestsChange = (e) => {
-    setProfileData({ ...profileData, interests: e.target.value.split(",") });
+  const handleInterestChange = (e) => {
+    const { value, checked } = e.target;
+    setProfileData((prev) => ({
+      ...prev,
+      interests: checked
+        ? [...prev.interests, value]
+        : prev.interests.filter((interest) => interest !== value),
+    }));
   };
 
-  // Handle form submission (save updates)
   const handleSaveProfile = async () => {
     try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        console.error("❌ No token found. Cannot save profile.");
+        return;
+      }
+
+      console.log("✅ Saving profile with data:", profileData);
+
       const response = await fetch(`http://localhost:5000/api/users/${user.account_id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(profileData),
+        body: JSON.stringify({
+          ...profileData,
+          interests: JSON.stringify(profileData.interests),
+        }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to update profile");
+        const errorMessage = `Failed to update profile: ${response.status} - ${response.statusText}`;
+        console.error("❌", errorMessage);
+        throw new Error(errorMessage);
       }
 
-      setIsEditing(false); // Exit edit mode
-      console.log("Profile updated successfully!");
+      const updatedData = await response.json();
+      console.log("✅ Profile updated successfully!", updatedData);
+
+      setProfileData({
+        ...updatedData,
+        interests: (() => {
+          try {
+            return updatedData.interests && updatedData.interests.trim() !== "" ? JSON.parse(updatedData.interests) : [];
+          } catch (parseError) {
+            console.error("❌ Error parsing updated interests:", parseError);
+            return [];
+          }
+        })(),
+      });
+
+      setIsEditing(false);
     } catch (error) {
-      console.error("Error updating profile:", error);
+      console.error("❌ Error updating profile:", error);
     }
   };
 
   return (
     <>
-      <Header /> {/* Header stays outside the profile class */}
+      <Header />
       <div className="profile">
         <div className="profile__content">
-          {/* Top Section */}
+          {/* ✅ Top Section */}
           <div className="profile__top">
             {/* Profile Picture */}
             <img
-              src={grampsImage} // Hardcoded profile picture from assets folder
+              src={grampsImage}
               alt="Image upload function is not available yet. I intend to implement Cloudinary in the future."
               className="profile__picture"
             />
-            <div className="profile__info">
+            {/* Introduction Box */}
+            <div className="profile__intro">
               {isEditing ? (
                 <>
-                  <input
-                    type="text"
-                    name="first_name"
-                    value={profileData.first_name}
-                    onChange={handleChange}
-                    className="profile__input"
-                    placeholder="First Name"
-                  />
-                  <input
-                    type="text"
-                    name="last_name"
-                    value={profileData.last_name}
-                    onChange={handleChange}
-                    className="profile__input"
-                    placeholder="Last Name"
-                  />
-                  <input
-                    type="number"
-                    name="age"
-                    value={profileData.age}
-                    onChange={handleChange}
-                    className="profile__input"
-                    placeholder="Age"
-                  />
-                  <input
-                    type="text"
-                    name="location"
-                    value={profileData.location}
-                    onChange={handleChange}
-                    className="profile__input"
-                    placeholder="Location"
-                  />
-                  <input
-                    type="text"
-                    name="languages"
-                    value={profileData.languages}
-                    onChange={handleChange}
-                    className="profile__input"
-                    placeholder="Languages"
-                  />
+                  <input type="text" name="first_name" value={profileData.first_name} onChange={handleChange} className="profile__input" placeholder="First Name" />
+                  <input type="text" name="last_name" value={profileData.last_name} onChange={handleChange} className="profile__input" placeholder="Last Name" />
+                  <input type="number" name="age" value={profileData.age} onChange={handleChange} className="profile__input" placeholder="Age" />
+                  <input type="text" name="location" value={profileData.location} onChange={handleChange} className="profile__input" placeholder="Location" />
+                  <input type="text" name="languages" value={profileData.languages} onChange={handleChange} className="profile__input" placeholder="Languages" />
+                  <input type="text" name="religion" value={profileData.religion} onChange={handleChange} className="profile__input" placeholder="Religion" />
                 </>
               ) : (
                 <>
-                  <h1 className="profile__name">
-                    {profileData.first_name} {profileData.last_name},{" "}
-                    <span className="profile__age">{profileData.age} years old</span>
-                  </h1>
+                  <h1 className="profile__name">{profileData.first_name} {profileData.last_name}, <span className="profile__age">{profileData.age} years old</span></h1>
                   <p className="profile__location">{profileData.location}</p>
-                  <p className="profile__languages">Speaks: {profileData.languages}</p>
+                  <p className="profile__languages">{profileData.languages}</p>
+                  <p className="profile__religion">{profileData.religion}</p>
                 </>
               )}
             </div>
           </div>
 
-          {/* Divider */}
+          {/* ✅ Divider */}
           <hr className="profile__divider" />
 
-          {/* Bottom Section */}
+          {/* ✅ Bottom Section */}
           <div className="profile__bottom">
-            <button
-              className="button profile__edit-button"
-              onClick={() => (isEditing ? handleSaveProfile() : setIsEditing(true))}
-              aria-label={isEditing ? "Save your profile" : "Edit your profile"}
-            >
+            <button className="button profile__edit-button" onClick={() => (isEditing ? handleSaveProfile() : setIsEditing(true))}>
               {isEditing ? "Save" : "Edit Profile"}
             </button>
 
-            {/* Bio Section */}
-            <div className="profile__bio">
-              <strong className="profile__bio-header">
-                {profileData.first_name} likes:
-              </strong>{" "}
+            <div className="profile__bio-box">
+              <strong>{profileData.first_name} likes:</strong>
               {isEditing ? (
-                <input
-                  type="text"
-                  name="interests"
-                  value={profileData.interests.join(", ")}
-                  onChange={handleInterestsChange}
-                  className="profile__input"
-                  placeholder="Interests (comma-separated)"
-                />
+                <fieldset className="profile__interests">
+                  <legend>Interests:</legend>
+                  {interestOptions.map((interest) => (
+                    <label key={interest}>
+                      <input type="checkbox" value={interest} checked={profileData.interests.includes(interest)} onChange={handleInterestChange} />
+                      {interest}
+                    </label>
+                  ))}
+                </fieldset>
               ) : (
-                profileData.interests.length > 0
-                  ? profileData.interests.join(", ")
-                  : "No interests specified."
+                <p>{profileData.interests.join(", ") || "No interests specified."}</p>
               )}
               {isEditing ? (
-                <textarea
-                  name="bio"
-                  value={profileData.bio}
-                  onChange={handleChange}
-                  className="profile__textarea"
-                  placeholder="Write something about yourself..."
-                />
+                <textarea name="bio" value={profileData.bio} onChange={handleChange} className="profile__textarea" placeholder="Write something about yourself..." />
               ) : (
                 <p className="profile__bio-text">{profileData.bio}</p>
               )}
             </div>
-
-            {/* Gallery */}
             <div className="profile__gallery">
-              <img
-                src="https://via.placeholder.com/200x150" // Hardcoded gallery image
-                alt="Gallery"
-                className="profile__gallery-image"
-              />
+              <img src="https://via.placeholder.com/200x150" alt="Gallery" className="profile__gallery-image" />
               <p className="profile__gallery-text">Gallery</p>
             </div>
           </div>
