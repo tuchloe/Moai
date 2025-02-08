@@ -34,15 +34,15 @@ const AuthProvider = ({ children }) => {
 
     try {
       console.log("🔍 Fetching user profile with token:", token);
-      
+
       // ✅ Ensure API request includes the token
       const response = await api.get("/api/auth/profile", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       if (response.status === 200) {
-        console.log("✅ User profile fetched successfully.");
-        setUser({ ...response.data, account_id: accountId });
+        console.log("✅ User profile fetched successfully:", response.data);
+        setUser(response.data); // ✅ Directly use response data
       } else {
         console.warn("⚠ Unexpected response:", response);
       }

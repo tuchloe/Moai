@@ -35,8 +35,13 @@ const verifyToken = (req, res, next) => {
         return res.status(403).json({ error: "Forbidden: Invalid token structure" });
       }
 
-      console.log("✅ Token verified successfully for user:", decoded.id);
-      req.user = { account_id: decoded.id }; // Explicitly attach user ID to request
+      // ✅ Attach user ID & email (if available) to `req.user`
+      req.user = {
+        account_id: decoded.id,
+        email: decoded.email || null, // Store email if present
+      };
+
+      console.log("✅ Token verified successfully for user:", req.user.account_id);
       next();
     });
   } catch (error) {

@@ -150,12 +150,12 @@ router.post("/login", async (req, res) => {
 // ✅ PROTECTED USER PROFILE ROUTE
 router.get("/profile", verifyToken, async (req, res) => {
   try {
-    console.log("🟢 Fetching Profile for User ID:", req.user.id);
+    console.log("🟢 Fetching Profile for User ID:", req.user.account_id);
 
     const [users] = await db.query(
       `SELECT account_id, first_name, last_name, age, location, interests, religion, languages, email 
        FROM Users WHERE account_id = ?`,
-      [req.user.id]
+      [req.user.account_id]
     );
 
     if (users.length === 0) return res.status(404).json({ error: "User not found" });

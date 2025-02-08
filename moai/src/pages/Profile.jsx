@@ -7,12 +7,13 @@ import grampsImage from "../assets/gramps.jpeg"; // Hardcoded profile picture
 const Profile = () => {
   const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [profileData, setProfileData] = useState({
     first_name: "",
     last_name: "",
     age: "",
     location: "",
-    languages: "",
+    languages: [],
     religion: "",
     bio: "",
     interests: [],
@@ -27,17 +28,20 @@ const Profile = () => {
   ];
 
   useEffect(() => {
+    if (!user?.id) return; // ✅ Ensure user is logged in before fetching
+
     const fetchProfile = async () => {
       try {
         const token = localStorage.getItem("token");
         if (!token) {
           console.error("❌ No token found in localStorage.");
+          setLoading(false);
           return;
         }
 
-        console.log("🔑 Sending request with token:", token);
+        console.log("🔍 Fetching profile for user:", user.id);
 
-        const response = await fetch(`http://localhost:5000/api/users/${user.account_id}`, {
+        const response = await fetch(`http://localhost:5000/api/users/${user.id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -47,36 +51,29 @@ const Profile = () => {
         }
 
         const data = await response.json();
-        console.log("✅ Received profile data:", data);
+        console.log("✅ Profile data received:", data);
 
+        // ✅ Ensure `languages` and `interests` are correctly formatted as arrays
         setProfileData({
           first_name: data.first_name || "",
           last_name: data.last_name || "",
           age: data.age || "",
           location: data.location || "",
-          languages: data.languages || "",
+          languages: Array.isArray(data.languages) ? data.languages : (data.languages ? [data.languages] : []),
           religion: data.religion || "",
           bio: data.bio || "",
-          interests: Array.isArray(data.interests) 
-            ? data.interests // ✅ Use it directly if already an array
-            : (() => {
-                try {
-                  return typeof data.interests === "string" && data.interests.trim() !== ""
-                    ? JSON.parse(data.interests) 
-                    : [];
-                } catch (parseError) {
-                  console.error("❌ Error parsing interests:", parseError);
-                  return [];
-                }
-              })(),
+          interests: Array.isArray(data.interests) ? data.interests : (data.interests ? [data.interests] : []),
         });
+
       } catch (error) {
         console.error("❌ Error fetching profile data:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
-    if (user?.account_id) fetchProfile();
-  }, [user?.account_id]);
+    fetchProfile();
+  }, [user?.id]); // ✅ Only runs when user ID changes
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -94,6 +91,8 @@ const Profile = () => {
   };
 
   const handleSaveProfile = async () => {
+    if (!profileData) return;
+
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -101,9 +100,9 @@ const Profile = () => {
         return;
       }
 
-      console.log("✅ Saving profile with data:", profileData);
+      console.log("✅ Saving profile:", profileData);
 
-      const response = await fetch(`http://localhost:5000/api/users/${user.account_id}`, {
+      const response = await fetch(`http://localhost:5000/api/users/${user.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -111,7 +110,8 @@ const Profile = () => {
         },
         body: JSON.stringify({
           ...profileData,
-          interests: JSON.stringify(profileData.interests), // ✅ Convert to string before sending
+          interests: JSON.stringify(profileData.interests), // ✅ Convert to JSON before sending
+          languages: JSON.stringify(profileData.languages),
         }),
       });
 
@@ -125,18 +125,8 @@ const Profile = () => {
 
       setProfileData({
         ...updatedData,
-        interests: Array.isArray(updatedData.interests) 
-          ? updatedData.interests
-          : (() => {
-              try {
-                return typeof updatedData.interests === "string" && updatedData.interests.trim() !== ""
-                  ? JSON.parse(updatedData.interests)
-                  : [];
-              } catch (parseError) {
-                console.error("❌ Error parsing updated interests:", parseError);
-                return [];
-              }
-            })(),
+        interests: Array.isArray(updatedData.interests) ? updatedData.interests : JSON.parse(updatedData.interests || "[]"),
+        languages: Array.isArray(updatedData.languages) ? updatedData.languages : JSON.parse(updatedData.languages || "[]"),
       });
 
       setIsEditing(false);
@@ -144,6 +134,9 @@ const Profile = () => {
       console.error("❌ Error updating profile:", error);
     }
   };
+
+  // ✅ Display loading message before rendering
+  if (loading) return <p>Loading...</p>;
 
   return (
     <>
@@ -155,7 +148,7 @@ const Profile = () => {
             {/* Profile Picture */}
             <img
               src={grampsImage}
-              alt="Image upload function is not available yet. I intend to implement Cloudinary in the future."
+              alt="Profile"
               className="profile__picture"
             />
             {/* Introduction Box */}
@@ -166,14 +159,14 @@ const Profile = () => {
                   <input type="text" name="last_name" value={profileData.last_name} onChange={handleChange} className="profile__input" placeholder="Last Name" />
                   <input type="number" name="age" value={profileData.age} onChange={handleChange} className="profile__input" placeholder="Age" />
                   <input type="text" name="location" value={profileData.location} onChange={handleChange} className="profile__input" placeholder="Location" />
-                  <input type="text" name="languages" value={profileData.languages} onChange={handleChange} className="profile__input" placeholder="Languages" />
+                  <input type="text" name="languages" value={profileData.languages.join(", ")} onChange={handleChange} className="profile__input" placeholder="Languages" />
                   <input type="text" name="religion" value={profileData.religion} onChange={handleChange} className="profile__input" placeholder="Religion" />
                 </>
               ) : (
                 <>
                   <h1 className="profile__name">{profileData.first_name} {profileData.last_name}, <span className="profile__age">{profileData.age} years old</span></h1>
                   <p className="profile__location">{profileData.location}</p>
-                  <p className="profile__languages">{profileData.languages}</p>
+                  <p className="profile__languages">{profileData.languages.join(", ")}</p>
                   <p className="profile__religion">{profileData.religion}</p>
                 </>
               )}
@@ -203,11 +196,6 @@ const Profile = () => {
                 </fieldset>
               ) : (
                 <p>{profileData.interests.join(", ") || "No interests specified."}</p>
-              )}
-              {isEditing ? (
-                <textarea name="bio" value={profileData.bio} onChange={handleChange} className="profile__textarea" placeholder="Write something about yourself..." />
-              ) : (
-                <p className="profile__bio-text">{profileData.bio}</p>
               )}
             </div>
           </div>

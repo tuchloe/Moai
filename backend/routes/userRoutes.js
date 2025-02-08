@@ -89,15 +89,20 @@ router.get("/:id", verifyToken, async (req, res) => {
 
     let user = users[0];
 
-    // ✅ Parse JSON fields (Interests & Languages)
-    try {
-      user.interests = user.interests ? JSON.parse(user.interests) : [];
-      user.languages = user.languages ? JSON.parse(user.languages) : [];
-    } catch (parseError) {
-      console.error("❌ Error parsing JSON fields:", parseError);
-      user.interests = [];
-      user.languages = [];
-    }
+    // ✅ Ensure `languages` and `interests` are valid JSON arrays
+    user.languages =
+      user.languages && typeof user.languages === "string" && user.languages.startsWith("[")
+        ? JSON.parse(user.languages)
+        : user.languages
+        ? [user.languages]
+        : [];
+
+    user.interests =
+      user.interests && typeof user.interests === "string" && user.interests.startsWith("[")
+        ? JSON.parse(user.interests)
+        : user.interests
+        ? [user.interests]
+        : [];
 
     console.log("✅ User profile retrieved:", user);
     res.json(user);
