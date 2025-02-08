@@ -1,7 +1,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Hanuman:wght@400;700&display=swap");
 
 // 🎨 Theme Colors
-$primary-color: #fa8d43; // Updated darker orange for theme
+$primary-color: #fa8d43;
 $secondary-color: #1e3a5f;
 $bg-light: #ffffff;
 $bg-dark: #1e1e1e;
@@ -9,8 +9,8 @@ $card-bg: #f5f5f5;
 $text-light: #fff;
 $text-dark: #222;
 $border-color: #ddd;
-$bg-gradient: linear-gradient(to bottom, #fde8cc, #f6c391); 
-$text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3); 
+$bg-gradient: linear-gradient(to bottom, #fde8cc, #f6c391);
+$text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 
 // 📱 Breakpoints
 $desktop: 1200px;
@@ -31,11 +31,57 @@ body {
   line-height: 1.6;
 }
 
+// ✅ 🌟 Pop-Up & Modal Styling (Use .pop-up class for all pop-ups)
+.pop-up {
+  background: $bg-gradient;
+  color: $text-dark;
+  font-family: "Hanuman", sans-serif;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  max-width: 400px;
+  width: 100%;
+  border: none;
+  text-align: center;
+  z-index: 1000;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+  }
+
+  p {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+  }
+
+  .pop-up__buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    margin-top: 1rem;
+
+    .button {
+      flex: 1;
+    }
+  }
+
+  @media (max-width: $mobile) {
+    width: 90%;
+    padding: 1.5rem;
+  }
+}
+
 // ✅ Input Fields (Global Styling)
 input,
 textarea,
 select {
-  font-family: inherit; /* Match global font */
+  font-family: inherit;
   font-size: 1rem;
   padding: 0.8rem;
   border: 1px solid $border-color;
@@ -44,13 +90,13 @@ select {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 
   &:focus {
-    border-color: $primary-color; /* Highlight on focus */
-    box-shadow: 0 0 4px rgba($primary-color, 0.5); /* Subtle glow effect */
+    border-color: $primary-color;
+    box-shadow: 0 0 4px rgba($primary-color, 0.5);
     outline: none;
   }
 
   &:hover {
-    border-color: darken($primary-color, 20%); /* Darker border on hover */
+    border-color: darken($primary-color, 20%);
   }
 }
 
@@ -140,13 +186,13 @@ select {
 // 📱 Responsive Design Utilities
 @media (max-width: $tablet) {
   body {
-    font-size: 1rem; /* Adjust font size for tablets */
+    font-size: 1rem;
   }
 }
 
 @media (max-width: $mobile) {
   body {
-    font-size: 0.9rem; /* Adjust font size for smaller screens */
+    font-size: 0.9rem;
   }
 
   .button {

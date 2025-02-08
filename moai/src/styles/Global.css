@@ -12,10 +12,52 @@ body {
   line-height: 1.6;
 }
 
+.pop-up {
+  background: linear-gradient(to bottom, #fde8cc, #f6c391);
+  color: #222;
+  font-family: "Hanuman", sans-serif;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  max-width: 400px;
+  width: 100%;
+  border: none;
+  text-align: center;
+  z-index: 1000;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+.pop-up h2 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+.pop-up p {
+  font-size: 1.1rem;
+  margin-bottom: 1rem;
+}
+.pop-up .pop-up__buttons {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+.pop-up .pop-up__buttons .button {
+  flex: 1;
+}
+@media (max-width: 600px) {
+  .pop-up {
+    width: 90%;
+    padding: 1.5rem;
+  }
+}
+
 input,
 textarea,
 select {
-  font-family: inherit; /* Match global font */
+  font-family: inherit;
   font-size: 1rem;
   padding: 0.8rem;
   border: 1px solid #ddd;
@@ -26,14 +68,14 @@ select {
 input:focus,
 textarea:focus,
 select:focus {
-  border-color: #fa8d43; /* Highlight on focus */
-  box-shadow: 0 0 4px rgba(250, 141, 67, 0.5); /* Subtle glow effect */
+  border-color: #fa8d43;
+  box-shadow: 0 0 4px rgba(250, 141, 67, 0.5);
   outline: none;
 }
 input:hover,
 textarea:hover,
 select:hover {
-  border-color: #d15806; /* Darker border on hover */
+  border-color: #d15806;
 }
 
 .button {
@@ -106,12 +148,12 @@ select:hover {
 
 @media (max-width: 900px) {
   body {
-    font-size: 1rem; /* Adjust font size for tablets */
+    font-size: 1rem;
   }
 }
 @media (max-width: 600px) {
   body {
-    font-size: 0.9rem; /* Adjust font size for smaller screens */
+    font-size: 0.9rem;
   }
   .button {
     font-size: 0.9rem;

@@ -8,6 +8,8 @@ const Profile = () => {
   const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [showEditInfo, setShowEditInfo] = useState(false);
+  const [showInterestsInfo, setShowInterestsInfo] = useState(false);
   const [profileData, setProfileData] = useState({
     first_name: "",
     last_name: "",
@@ -28,7 +30,7 @@ const Profile = () => {
   ];
 
   useEffect(() => {
-    if (!user?.id) return; // ✅ Ensure user is logged in before fetching
+    if (!user?.id) return;
 
     const fetchProfile = async () => {
       try {
@@ -73,7 +75,7 @@ const Profile = () => {
     };
 
     fetchProfile();
-  }, [user?.id]); // ✅ Only runs when user ID changes
+  }, [user?.id]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -110,7 +112,7 @@ const Profile = () => {
         },
         body: JSON.stringify({
           ...profileData,
-          interests: JSON.stringify(profileData.interests), // ✅ Convert to JSON before sending
+          interests: JSON.stringify(profileData.interests),
           languages: JSON.stringify(profileData.languages),
         }),
       });
@@ -148,7 +150,7 @@ const Profile = () => {
             {/* Profile Picture */}
             <img
               src={grampsImage}
-              alt="Profile"
+              alt="This is where I would write a caption for accessibility services. Currently, image upload is not available yet. Cloudinary will be implemented in the future."
               className="profile__picture"
             />
             {/* Introduction Box */}
@@ -178,29 +180,29 @@ const Profile = () => {
 
           {/* ✅ Bottom Section */}
           <div className="profile__bottom">
-            <button className="button profile__edit-button" onClick={() => (isEditing ? handleSaveProfile() : setIsEditing(true))}>
-              {isEditing ? "Save" : "Edit Profile"}
+            <button className="button profile__edit-button" onClick={() => setShowEditInfo(true)}>
+              Edit Profile
             </button>
 
             <div className="profile__bio-box">
               <strong>{profileData.first_name} likes:</strong>
-              {isEditing ? (
-                <fieldset className="profile__interests">
-                  <legend>Interests:</legend>
-                  {interestOptions.map((interest) => (
-                    <label key={interest}>
-                      <input type="checkbox" value={interest} checked={profileData.interests.includes(interest)} onChange={handleInterestChange} />
-                      {interest}
-                    </label>
-                  ))}
-                </fieldset>
-              ) : (
-                <p>{profileData.interests.join(", ") || "No interests specified."}</p>
-              )}
+              <p>{profileData.interests.join(", ") || "No interests specified."}</p>
+              <button className="button profile__edit-button" onClick={() => setShowInterestsInfo(true)}>
+                Interests Info
+              </button>
             </div>
           </div>
         </div>
       </div>
+
+      {/* 🔹 EDIT INFO POP-UP */}
+      {showEditInfo && (
+        <div className="pop-up">
+          <h2>Edit Profile Info</h2>
+          <p>Here you can edit your profile details...</p>
+          <button className="button" onClick={() => setShowEditInfo(false)}>Close</button>
+        </div>
+      )}
     </>
   );
 };

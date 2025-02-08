@@ -1,18 +1,18 @@
 import { useState, useEffect } from "react";
-import api from "../api/api"; // Axios instance for API calls
 import { useAuth } from "../context/AuthContext";
+import api from "../api/api"; // Axios instance for API calls
 import Header from "../components/Header/Header";
 import AddFriendButton from "../components/AddFriend"; // ✅ Import AddFriendButton
 import "../styles/MeetSomeoneNew.scss";
+import grampsImage from "../assets/gramps.jpeg"; // Hardcoded profile picture
 
 const MeetSomeoneNew = () => {
   const { user } = useAuth();
   const [profile, setProfile] = useState(null);
   const [filters, setFilters] = useState({ language: "", religion: "", interests: [] });
   const [showFilters, setShowFilters] = useState(false);
-  const [showMessageModal, setShowMessageModal] = useState(false);
-  const [messageContent, setMessageContent] = useState("");
-  const [loading, setLoading] = useState(false); // ✅ Added loading state
+  const [showMessage, setShowMessage] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   // 🔍 Fetch a random profile based on filters
   const fetchProfile = async () => {
@@ -75,52 +75,88 @@ const MeetSomeoneNew = () => {
   // ✅ Skip current profile & fetch another
   const handleSkip = () => fetchProfile();
 
-  // ✅ Open/Close Message Modal
-  const openMessageModal = () => setShowMessageModal(true);
-  const closeMessageModal = () => setShowMessageModal(false);
+  // ✅ Toggle Filter Modal
+  const toggleFilterModal = () => setShowFilters((prev) => !prev);
 
-  // ✅ Send a message
-  const handleSendMessage = async () => {
-    if (!messageContent.trim()) {
-      alert("⚠ Message cannot be empty!");
-      return;
-    }
-
-    try {
-      const token = localStorage.getItem("token");
-
-      if (!token) {
-        console.error("❌ No token found. Cannot send message.");
-        return;
-      }
-
-      await api.post("/api/messages/send", {
-        receiver_account_id: profile.account_id,
-        content: messageContent,
-      }, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      alert("✅ Message sent!");
-      setMessageContent("");
-      closeMessageModal();
-    } catch (error) {
-      console.error("❌ Error sending message:", error.response?.data || error);
-    }
+  // ✅ Apply Filters
+  const applyFilters = () => {
+    fetchProfile();
+    toggleFilterModal();
   };
+
+  // ✅ Toggle "Send Message" Pop-up
+  const toggleMessagePopUp = () => setShowMessage((prev) => !prev);
 
   return (
     <>
       <Header />
       <div className="meet-someone-new">
-        {/* 🔹 FILTER BUTTON */}
-        <button className="meet-someone-new__filter-button" onClick={() => setShowFilters(true)}>
-          Filter Profiles
-        </button>
+        <div className="meet-someone-new__content">
+          {/* ✅ Top Section */}
+          <div className="meet-someone-new__top">
+            {/* Profile Picture */}
+            <img
+              src={grampsImage}
+              alt="Profile picture is not available yet. Image upload will be implemented in the future."
+              className="meet-someone-new__picture"
+            />
+            {/* Introduction Box */}
+            <div className="meet-someone-new__intro">
+              {loading ? (
+                <p>Loading profile...</p>
+              ) : profile ? (
+                <>
+                  <h1 className="meet-someone-new__name">
+                    {profile.first_name} {profile.last_name},{" "}
+                    <span className="meet-someone-new__age">{profile.age} years old</span>
+                  </h1>
+                  <p className="meet-someone-new__location">{profile.location}</p>
+                  <p className="meet-someone-new__languages">
+                    {Array.isArray(profile.languages) ? profile.languages.join(", ") : profile.languages}
+                  </p>
+                  <p className="meet-someone-new__religion">{profile.religion}</p>
+                </>
+              ) : (
+                <p>No profiles available.</p>
+              )}
+            </div>
+
+            {/* Buttons (Add Friend & Send Message) */}
+            <div className="meet-someone-new__actions">
+              {profile && <AddFriendButton friendId={profile.account_id} />}
+              <button className="button" onClick={toggleMessagePopUp}>
+                Send a Message
+              </button>
+            </div>
+          </div>
+
+          {/* ✅ Divider */}
+          <hr className="meet-someone-new__divider" />
+
+          {/* ✅ Bottom Section */}
+          <div className="meet-someone-new__bottom">
+            {/* Interests & Bio */}
+            <div className="meet-someone-new__bio-box">
+              <strong>{profile?.first_name} likes:</strong>
+              <p>{profile?.interests?.join(", ") || "No interests specified."}</p>
+              <p className="meet-someone-new__bio-text">{profile?.bio}</p>
+            </div>
+
+            {/* Skip Profile & Apply Filters */}
+            <div className="meet-someone-new__buttons">
+              <button className="button meet-someone-new__button-skip" onClick={handleSkip}>
+                Skip Profile
+              </button>
+              <button className="button meet-someone-new__button-filters" onClick={toggleFilterModal}>
+                Apply Filters
+              </button>
+            </div>
+          </div>
+        </div>
 
         {/* 🔹 FILTER MODAL */}
         {showFilters && (
-          <div className="meet-someone-new__filter-modal">
+          <div className="pop-up">
             <h2>Apply Filters</h2>
             <label>
               Language:
@@ -144,42 +180,26 @@ const MeetSomeoneNew = () => {
                 </label>
               ))}
             </fieldset>
-            <button onClick={() => setShowFilters(false)}>Close</button>
-            <button onClick={fetchProfile}>Apply Filters</button>
-          </div>
-        )}
-
-        {/* 🔹 PROFILE DISPLAY */}
-        {loading ? (
-          <p>Loading profile...</p>
-        ) : profile ? (
-          <div className="meet-someone-new__profile">
-            <img
-              src={"Gramps.svg"}
-              alt="Profile picture is not available yet. Image upload will be implemented in the future."
-              className="meet-someone-new__profile-picture"
-            />
-            <h2>{profile.first_name} {profile.last_name}, {profile.age} years old</h2>
-            <p>{profile.location}</p>
-            <p>{profile.languages}</p>
-            <p>{profile.religion}</p>
-            <div className="meet-someone-new__bio">{profile.bio}</div>
-            <div className="meet-someone-new__actions">
-              <AddFriendButton friendId={profile.account_id} />
-              <button onClick={openMessageModal}>Send a Message</button>
-              <button onClick={handleSkip}>Skip Profile</button>
+            <div className="pop-up__buttons">
+              <button className="button" onClick={toggleFilterModal}>Close</button>
+              <button className="button" onClick={applyFilters}>Apply Filters</button>
             </div>
           </div>
-        ) : (
-          <p>No profiles available.</p>
         )}
 
-        {/* 🔹 MESSAGE MODAL */}
-        {showMessageModal && (
-          <div className="meet-someone-new__message-modal">
-            <textarea value={messageContent} onChange={(e) => setMessageContent(e.target.value)} placeholder="Type your message" />
-            <button onClick={handleSendMessage}>Send</button>
-            <button onClick={closeMessageModal}>Cancel</button>
+        {/* 🔹 MESSAGE POP-UP */}
+        {showMessage && (
+          <div className="pop-up">
+            <h2>Message Feature Info</h2>
+            <p>
+              I've implemented a simple messaging system in the back end using API calls and our database but have yet to create a front end for it.
+            </p>
+            <p>
+              I plan to integrate a real-time API, such as socket.io, for a better experience.
+            </p>
+            <div className="pop-up__buttons">
+              <button className="button" onClick={toggleMessagePopUp}>Close</button>
+            </div>
           </div>
         )}
       </div>
