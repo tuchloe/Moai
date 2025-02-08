@@ -1,6 +1,6 @@
 # Project Title: Moai
 
-# 🏛️ Moai - Social Connection Platform
+# Moai - Social Connection Platform
 
 Moai is a social platform designed for seniors. This project focuses on authentication, IP-API, database structure/functionality, Meet Someone feature, and tailored UX/UI and screen reader support for accessibility. 
 
