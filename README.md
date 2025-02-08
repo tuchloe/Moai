@@ -13,14 +13,11 @@ Follow these instructions to install and run the project in your local developme
 ---
 
 ## **1. Prerequisites**  
-
 Ensure you have installed:  
 
-- **[Node.js] 
-- **[MySQL]
-- **[Git]
-- 
----
+- Node.js
+- MySQL
+- Git
 
 ## **2. Clone the Repository**  
 Open a terminal and run:  
@@ -30,10 +27,6 @@ cd moai
 
 ##  **3. Install Dependencies**
 Run the following command to install all required packages:
-
-sh
-Copy
-Edit
 npm install
 This will install all dependencies from package.json for both the backend and frontend.
 
