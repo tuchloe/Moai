@@ -1,5 +1,77 @@
 # Project Title: Moai
 
+# 🏛️ Moai - Social Connection Platform
+
+Moai is a social platform designed for seniors. This project focuses on authentication, IP-API, database structure/functionality, Meet Someone feature, and tailored UX/UI and screen reader support for accessibility. 
+
+---
+
+## Dev Set-up **  
+
+Follow these instructions to install and run the project in your local development environment.
+
+---
+
+## **1. Prerequisites**  
+
+Ensure you have installed:  
+
+- **[Node.js] 
+- **[MySQL]
+- **[Git]
+- 
+---
+
+## **2. Clone the Repository**  
+Open a terminal and run:  
+```sh
+git clone https://github.com/your-username/moai.git
+cd moai
+
+##  **3. Install Dependencies**
+Run the following command to install all required packages:
+
+sh
+Copy
+Edit
+npm install
+This will install all dependencies from package.json for both the backend and frontend.
+
+##  **4. Setup Environment Variables**
+Create a .env file in the root directory by copying the provided example file:
+cp .env.example .env
+Then, open the .env file and fill in your own values (see the section Environment Variables).
+
+##  ** 5. Set Up the Database **
+Start MySQL and create a new database
+Import the schema: moai_db
+
+Update your .env file with your MySQL credentials.
+
+##  ** 6. Start the Backend Server **
+Start the Express.js API server:
+
+This will:
+- Start the backend server on http://localhost:5000
+- Connect to the MySQL database
+- Verify API endpoints
+
+##  ** 7. Start the Frontend **
+In another terminal window, run:
+npm start
+
+This will start the React frontend and automatically open http://localhost:3000 in your browser.
+
+##  ** 8. Open the Project in Your Browser **
+Once both backend and frontend are running, open http://localhost:3000 in your browser
+
+You should see the Moai login page or dashboard.
+
+
+
+
+
+
 ## Overview
 
 "Moai" is a concept originating from Okinawa, Japan that refers to a social group of lifelong friends that can provide support in social, financial, health, or spiritual interests. This concept is strongly associated with increasing longevity through social fulfillment, especially in old age.
